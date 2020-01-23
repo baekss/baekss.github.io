@@ -12,10 +12,6 @@ import org.springframework.stereotype.Service;
 public class TutorialService {
 	private static Logger logger = LoggerFactory.getLogger(TutorialService.class);
 	
-	public TutorialService() {
-		logger.debug("TutorialService");
-	}
-	
 	@PostConstruct
 	public void init() {
 		logger.debug("TutorialService init");
