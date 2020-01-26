@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 
 
 @Controller
-@RequestMapping(path="/main")
+@RequestMapping(path="/")
 public class TutorialController {
 	
 	private static Logger logger = LoggerFactory.getLogger(TutorialController.class);
@@ -19,7 +19,7 @@ public class TutorialController {
 		logger.info("TutorialController init");
 	}
 	
-	@RequestMapping(path="/view")
+	@RequestMapping(path="")
 	public String appMain()throws Exception {
 		return "view";
 	}

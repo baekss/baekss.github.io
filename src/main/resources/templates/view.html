@@ -29,7 +29,7 @@ $(function(){
 		var p = {"id":"100"};
 		$.ajax({
 			type:'PUT',
-			url:'http://api.bss.co.kr:8080/api/informations',
+			url:'http://api.bss.com:58080/api/informations',
 			contentType:'application/json; charset=UTF-8',
 			data:JSON.stringify(p),
 			dataType:'json',
@@ -47,7 +47,7 @@ $(function(){
 		});
 		
 		
-		var response = fetch('http://api.bss.co.kr:8080/api/informations',{
+		var response = fetch('http://api.bss.com:58080/api/informations',{
 		    method: 'POST', 
 		    mode: 'cors',
 		    credentials: 'include',
@@ -72,8 +72,11 @@ $(function(){
 	
 	elements.push(el1, el2);
 	var elementScan = new ElementScan(elements);
-	new AopScan(elementScan, beforeFunction, afterFunction, exceptionFunction, finallyFunction);
-})
+	var applyEventPropertyName = [];
+	applyEventPropertyName.push(eventProperties.change);
+	applyEventPropertyName.push(eventProperties.keyup);
+	new AopScan(elementScan, applyEventPropertyName, beforeFunction, afterFunction, exceptionFunction, finallyFunction);
+});
 
 </script>
 </head>
