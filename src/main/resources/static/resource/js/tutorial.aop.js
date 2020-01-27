@@ -10,13 +10,14 @@ function ElementScan(elements){
 	}
 }
 
-function AopScan(elementScan, eventPropertyName, before, after, e, final){
+function AopScan(elementScan, eventPropertyNames, eventAdviceFunctions){
 	var context = this;
+	context.adviceFunctions = eventAdviceFunctions||{before:undefined, after:undefined, eFunc:undefined, finallyFunc:undefined};
 	var targetElements = elementScan.getElements();
 	
 	context.injectProxy = function(targetElement){
 		var events = $._data(targetElement.get(0), "events");
-		eventPropertyName.forEach(function(propertyName, i){
+		eventPropertyNames.forEach(function(propertyName, i){
 			
 			for(var property in events){
 				switch(property){
@@ -27,7 +28,7 @@ function AopScan(elementScan, eventPropertyName, before, after, e, final){
 							var proceed = v.handler;
 							targetElement.off(property);
 							targetElement.on(property, function(event){
-								context.advice.call(context, before, proceed.bind(this, event), after, e, final);
+								context.advice.call(context, proceed.bind(this, event));
 							});
 						});
 						break;
@@ -40,24 +41,24 @@ function AopScan(elementScan, eventPropertyName, before, after, e, final){
 		
 	}
 	
-	context.advice = function(beforeFunction, targetFunction, afterFunction, exceptionFunction, finallyFunction){
+	context.advice = function(targetFunction){
 		try{
-			if(typeof beforeFunction === 'function'){
-				beforeFunction();
+			if(typeof context.adviceFunctions.before === 'function'){
+				context.adviceFunctions.before();
 			}
 			if(typeof targetFunction === 'function'){
 				targetFunction();
 			}
-			if(typeof afterFunction === 'function'){
-				afterFunction();
+			if(typeof context.adviceFunctions.after === 'function'){
+				context.adviceFunctions.after();
 			}
 		}catch(e){
-			if(typeof exceptionFunction === 'function'){
-				exceptionFunction();
+			if(typeof context.adviceFunctions.eFunc === 'function'){
+				context.adviceFunctions.eFunc(e);
 			}
 		}finally{
-			if(typeof finallyFunction === 'function'){
-				finallyFunction();
+			if(typeof context.adviceFunctions.finallyFunc === 'function'){
+				context.adviceFunctions.finallyFunc();
 			}
 		}
 	}

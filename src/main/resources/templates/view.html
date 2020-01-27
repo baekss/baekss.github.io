@@ -8,18 +8,6 @@
 <script type="text/javascript" src="/resource/js/tutorial.aop.js"></script>
 <link rel="stylesheet" href="/resource/css/bootstrap.css" />
 <script type="text/javascript" th:inline="javascript">
-function beforeFunction(){
-	console.log('pre processing');
-}
-function afterFunction(){
-	console.log('after processing');
-}
-function exceptionFunction(){
-	console.log('exception processing');
-}
-function finallyFunction(){
-	console.log('finally processing');
-}
 $(function(){
 	var elements = new Array();
 	
@@ -70,12 +58,33 @@ $(function(){
 		console.log('keyCode : '+e.keyCode+' and value : '+$(this).val());
 	});
 	
+	
 	elements.push(el1, el2);
 	var elementScan = new ElementScan(elements);
-	var applyEventPropertyName = [];
-	applyEventPropertyName.push(eventProperties.change);
-	applyEventPropertyName.push(eventProperties.keyup);
-	new AopScan(elementScan, applyEventPropertyName, beforeFunction, afterFunction, exceptionFunction, finallyFunction);
+	
+	
+	var applyEventPropertyNames = [];
+	applyEventPropertyNames.push(eventProperties.change);
+	applyEventPropertyNames.push(eventProperties.keyup);
+	
+	
+	var eventAdviceFunctions = {
+									before:function(){
+										console.log('pre processing');
+									},
+									after:function(){
+										console.log('after processing');
+									},
+									eFunc:function(exception){
+										console.log(exception);
+									},
+									finallyFunc:function(){
+										console.log('finally processing');
+									}
+								};
+	
+	
+	new AopScan(elementScan, applyEventPropertyNames, eventAdviceFunctions);
 });
 
 </script>
