@@ -12,30 +12,20 @@ $(function(){
 	var elements = new Array();
 	
 	var el1 = $('#colorSelector').on('change', function(){
-		console.log($(this).val()+' changed done');
-	}).on('click', function(e){
-		var p = {"id":"100"};
-		$.ajax({
-			type:'PUT',
-			url:'http://api.bss.com:58080/api/informations',
-			contentType:'application/json; charset=UTF-8',
-			data:JSON.stringify(p),
-			dataType:'json',
-			xhrFields: {
-		    	withCredentials: true
-			},
-			success:function(result){
-				console.log(result);
-			},
-			error:function(jqXHR, textStatus, errorThrown){
-				console.log(jqXHR);
-				console.log(textStatus);
-				console.log(errorThrown);
-			}
-		});
+		console.log('This color is '+$(this).val());
+	});
+	
+	var el2 = $(':input[name=keywordBox]').on('keyup', function(e){
+		console.log('keyCode : '+e.keyCode+' and value : '+$(this).val());
+	});
+	
+	var el3 = $(':radio[name=size]');
+	
+	var el4 = $('#result').on('click', function(e){
+		var p = { "id":"L0409"
+				, "size": $(el3).filter(":checked").val()};
 		
-		
-		var response = fetch('http://api.bss.com:58080/api/informations',{
+		var response = fetch('http://api.bss.com:58080/api/product',{
 		    method: 'POST', 
 		    mode: 'cors',
 		    credentials: 'include',
@@ -50,27 +40,44 @@ $(function(){
 		.then(result => {console.log(result)})
 		.catch(err => {console.log(err)});
 		
-		
 		//console.log(e.target.tagName+' clicked done');
 	});
 	
-	var el2 = $(':input[name=keywordBox]').on('keyup', function(e){
-		console.log('keyCode : '+e.keyCode+' and value : '+$(this).val());
-	});
-	
-	
-	elements.push(el1, el2);
+	elements.push(el4);
 	var elementScan = new ElementScan(elements);
 	
 	
 	var applyEventPropertyNames = [];
 	applyEventPropertyNames.push(eventProperties.change);
+	applyEventPropertyNames.push(eventProperties.click);
 	applyEventPropertyNames.push(eventProperties.keyup);
 	
 	
 	var eventAdviceFunctions = {
 									before:function(){
+										
 										console.log('pre processing');
+										var p = { "color" : el1.val()
+												, "size" : $(el3).filter(":checked").val()
+												, "keyword" : el2.val()};
+										$.ajax({
+											type:'POST',
+											url:'http://api.bss.com:58080/api/personalizedData',
+											contentType:'application/json; charset=UTF-8',
+											data:JSON.stringify(p),
+											dataType:'text',
+											xhrFields: {
+										    	withCredentials: true
+											},
+											success:function(result){
+												console.log(result);
+											},
+											error:function(jqXHR, textStatus, errorThrown){
+												console.log(jqXHR);
+												console.log(textStatus);
+												console.log(errorThrown);
+											}
+										});
 									},
 									after:function(){
 										console.log('after processing');
@@ -99,10 +106,19 @@ $(function(){
 <option value="red">RED</option>
 </select>
 </div>
-
+<div>
+<p>check the size</p>
+<input type="radio" name="size" value="100"/><span>100</span>
+<input type="radio" name="size" value="95"/><span>95</span>
+<input type="radio" name="size" value="90"/><span>90</span>
+</div>
 <div>
 <p>Fill in with text</p>
 <input type="text" name="keywordBox"/>
+</div>
+<div>
+<p>Fill in with text</p>
+<input type="button" id="result" value="결과"/>
 </div>
 </body>
 </html>
