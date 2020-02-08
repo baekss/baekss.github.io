@@ -1,6 +1,27 @@
-var eventProperties = {change : "change"
+var eventProperties = {
+						  blur : "blur"
+						, focus : "focus"
+						, focusin : "focusin"
+						, focusout : "focusout"
+						, resize : "resize"
+						, scroll : "scroll"
 						, click : "click"
-						, keyup : "keyup"};
+						, dblclick : "dblclick"
+						, mousedown : "mousedown"
+						, mouseup : "mouseup"
+						, mousemove : "mousemove"
+						, mouseover : "mouseover"
+						, mouseout : "mouseout"
+						, mouseenter : "mouseenter"
+						, mouseleave : "mouseleave"
+						, change : "change"
+						, select : "select"
+						, submit : "submit"
+						, keydown : "keydown"
+						, keypress : "keypress"
+						, keyup : "keyup"
+						, contextmenu : "contextmenu"
+					  };
 
 function ElementScan(elements){
 	this.elements = elements;
