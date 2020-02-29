@@ -40,26 +40,19 @@ function AopScan(elementScan, eventPropertyNames, eventAdviceFunctions){
 		var events = $._data(targetElement.get(0), "events");
 		eventPropertyNames.forEach(function(propertyName, i){
 			
-			for(var property in events){
-				switch(property){
-					case propertyName : 
-						//This logic use a loop syntax because a element may has many event handler in same property name
-						//But it assume that a element has one event handler in same property name in this study
-						(events[property]).forEach(function(v,i){
-							var proceed = v.handler;
-							targetElement.off(property);
-							targetElement.on(property, function(event){
-								context.advice.call(context, proceed.bind(this, event));
-							});
-						});
-						break;
-				}
-				break;
+			if(typeof events[propertyName] !== "undefined"){
+				//This logic use a loop syntax because a element may has many event handler in same property name
+				//But it assume that a element has one event handler in same property name in this study
+				(events[propertyName]).forEach(function(v,i){
+					var proceed = v.handler;
+					targetElement.off(propertyName);
+					targetElement.on(propertyName, function(event){
+						context.advice.call(context, proceed.bind(this, event));
+					});
+				});
 			}
 			
 		});
-		
-		
 	}
 	
 	context.advice = function(targetFunction){
