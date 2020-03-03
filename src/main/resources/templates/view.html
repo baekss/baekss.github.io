@@ -8,20 +8,10 @@
 <script type="text/javascript" src="/resource/js/tutorial.aop.js"></script>
 <link rel="stylesheet" href="/resource/css/bootstrap.css" />
 <script type="text/javascript" th:inline="javascript">
-$(function(){
-	var el1 = $('#colorSelector').on('change', function(){
-		console.log('This color is '+$(this).val());
-	});
-	
-	var el2 = $(':input[name=keywordBox]').on('keyup', function(e){
-		console.log('keyCode : '+e.keyCode+' and value : '+$(this).val());
-	});
-	
-	var el3 = $(':radio[name=size]');
-	
-	var el4 = $('#result').on('click mouseover', function(e){
-		var p = { "id":"L0409"
-				, "size": $(el3).filter(":checked").val()};
+window.onload = function(){
+	var el4 = document.querySelector('#result');
+	el4.addEventListener('click', function(e){
+		var p = { "id":"L0409"};
 		
 		var response = fetch('http://api.bss.com:58080/api/product',{
 		    method: 'POST', 
@@ -38,7 +28,6 @@ $(function(){
 		.then(result => {console.log(result)})
 		.catch(err => {console.log(err)});
 	});
-	
 //------------------------------------ apply aop ------------------------------------
 	var elements = [];
 	elements.push(el4);
@@ -51,28 +40,19 @@ $(function(){
 	
 	var eventAdviceFunctions = {
 									before:function(){
-										
 										console.log('pre processing');
-										var p = { "color" : el1.val()
-												, "size" : $(el3).filter(":checked").val()
-												, "keyword" : el2.val()};
-										$.ajax({
-											type:'POST',
-											url:'http://api.bss.com:58080/api/personalizedData',
-											contentType:'application/json; charset=UTF-8',
-											data:JSON.stringify(p),
-											dataType:'text',
-											xhrFields: {
-										    	withCredentials: true
-											},
-											success:function(result){
-												console.log(result);
-											},
-											error:function(jqXHR, textStatus, errorThrown){
-												console.log(jqXHR);
-												console.log(textStatus);
-												console.log(errorThrown);
-											}
+										var p = { "color" : "red"
+												, "size" : 100
+												, "keyword" : "text"};
+										fetch('http://api.bss.com:58080/api/personalizedData',{
+										    method: 'POST', 
+										    mode: 'cors',
+										    credentials: 'include',
+										    headers: {
+										      'Content-Type': 'application/json',
+										    },
+										    referrerPolicy: 'no-referrer',
+										    body: JSON.stringify(p)
 										});
 									},
 									after:function(){
@@ -88,37 +68,15 @@ $(function(){
 	
 	
 	new AopScan(elementScan, trigger, eventAdviceFunctions);
-});
-
+};
 </script>
 </head>
 <body>
 <div class="m-md-4">
-
-<div class="mb-md-4 img-thumbnail">
-<p>Pick a color</p>
-<select id="colorSelector">
-<option value="black">BLACK</option>
-<option value="white">WHITE</option>
-<option value="blue">BLUE</option>
-<option value="red">RED</option>
-</select>
-</div>
-<div class="mb-md-4 img-thumbnail">
-<p>check the size</p>
-<input type="radio" name="size" value="100"/><span>100</span>
-<input type="radio" name="size" value="95"/><span>95</span>
-<input type="radio" name="size" value="90"/><span>90</span>
-</div>
-<div class="mb-md-4 img-thumbnail">
-<p>Fill in with text</p>
-<input type="text" name="keywordBox"/>
-</div>
 <div class="mb-md-4 img-thumbnail">
 <p>submit</p>
 <input type="button" id="result" value="결과"/>
 </div>
-
 </div>
 </body>
 </html>

@@ -1,3 +1,12 @@
+//delegatedAddEventListener of EventTarget has a addEventListener of EventTarget
+EventTarget.prototype.delegatedAddEventListener = EventTarget.prototype.addEventListener;
+
+//addEventListener of EventTarget has a function which call delegatedAddEventListener
+EventTarget.prototype.addEventListener = function(triggerEvent, listener, useCapture){
+	this.triggerEventAndListener = this.triggerEventAndListener||{};
+	this.triggerEventAndListener[triggerEvent] = listener;
+	this.delegatedAddEventListener(triggerEvent, listener, useCapture);
+};
 var eventProperties = {
 						  blur : "blur"
 						, focus : "focus"
@@ -37,41 +46,35 @@ function AopScan(elementScan, eventPropertyNames, eventAdviceFunctions){
 	var targetElements = elementScan.getElements();
 	
 	context.injectProxy = function(targetElement){
-		var events = $._data(targetElement.get(0), "events");
+		var triggerEventAndListener = targetElement["triggerEventAndListener"];
 		eventPropertyNames.forEach(function(propertyName, i){
-			
-			if(typeof events[propertyName] !== "undefined"){
-				//This logic use a loop syntax because a element may has many event handler in same property name
-				//But it assume that a element has one event handler in same property name in this study
-				(events[propertyName]).forEach(function(v,i){
-					var proceed = v.handler;
-					targetElement.off(propertyName);
-					targetElement.on(propertyName, function(event){
-						context.advice.call(context, proceed.bind(this, event));
-					});
+			var proceed = triggerEventAndListener[propertyName];
+			if(typeof proceed === "function"){
+				targetElement.removeEventListener(propertyName, proceed);
+				targetElement.addEventListener(propertyName, function(event){
+					context.advice.call(context, proceed.bind(this, event));
 				});
 			}
-			
 		});
 	}
 	
 	context.advice = function(targetFunction){
 		try{
-			if(typeof context.adviceFunctions.before === 'function'){
+			if(typeof context.adviceFunctions.before === "function"){
 				context.adviceFunctions.before();
 			}
-			if(typeof targetFunction === 'function'){
+			if(typeof targetFunction === "function"){
 				targetFunction();
 			}
-			if(typeof context.adviceFunctions.after === 'function'){
+			if(typeof context.adviceFunctions.after === "function"){
 				context.adviceFunctions.after();
 			}
 		}catch(e){
-			if(typeof context.adviceFunctions.eFunc === 'function'){
+			if(typeof context.adviceFunctions.eFunc === "function"){
 				context.adviceFunctions.eFunc(e);
 			}
 		}finally{
-			if(typeof context.adviceFunctions.finallyFunc === 'function'){
+			if(typeof context.adviceFunctions.finallyFunc === "function"){
 				context.adviceFunctions.finallyFunc();
 			}
 		}
