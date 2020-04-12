@@ -38,6 +38,11 @@ public class TutorialController {
 		return "view";
 	}
 	
+	@RequestMapping(path="circuitBreaker")
+	public String appCircuitBreakerTest()throws Exception {
+		return "circuitBreakerTest";
+	}
+	
 	@RequestMapping(path="/products/{categoryId}", method=RequestMethod.GET)
 	@ResponseBody
 	public List<Product> getCategoryProducts(@PathVariable("categoryId") long categoryId) throws Exception{

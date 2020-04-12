@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta charset="UTF-8">
+<title>tutorial</title>
+<script type="text/javascript" src="/resource/js/jquery-3.4.1.js"></script>
+<script type="text/javascript">
+function doCircuitBreaker(){
+	$.ajax({
+		type:'GET',
+		url:'http://api.bss.com:58080/api/products/120',
+		contentType:'application/x-www-form-urlencoded; charset=UTF-8',
+		dataType:'json',
+		xhrFields: {
+	    	withCredentials: true
+		},
+		success:function(result){
+			console.log(result);
+		}
+	});
+}
+
+$.ajax({
+	type:'GET',
+	url:'http://m.bss.com:8080/products/120',
+	contentType:'application/x-www-form-urlencoded; charset=UTF-8',
+	dataType:'json',
+	xhrFields: {
+    	withCredentials: true
+	},
+	success:function(result){
+		console.log(result);
+	},
+	error:function(jqXHR){
+		//응답코드 500번대는 api서버로 직접 요청을 보낸다.
+		if(String(jqXHR.status).startsWith("5")){
+			doCircuitBreaker();
+		}
+	}
+});
+</script>
+</head>
+<body>
+
+</body>
+</html>

@@ -32,7 +32,7 @@ public class TutorialService {
 	public List<Product> getCategoryProducts(long categoryId) throws Exception{
 		List<Product> products = null;
 		WebClient webClient = builder.build();
-		//Circuit Breaker 발생시킴
+		//application.properties에서 api서버의 포트번호를 바꿔 의도적으로 Circuit Breaker 발생시킴
 		Mono<List> mono = webClient.get().uri("/api/products/"+categoryId).retrieve().bodyToMono(List.class);
 		products = mono.block();
 		return products;
@@ -43,6 +43,8 @@ public class TutorialService {
 		products.add(new Product("Temp-A상품","L",12000));
 		products.add(new Product("Temp-B상품","M",15000));
 		products.add(new Product("Temp-C상품","S",22000));
+		//fallbackMethod 에서도 예외를 발생시킴
+		products.get(3);
 		return products; 
 	}
 }
