@@ -19,7 +19,7 @@ $(function(){
 	
 	var el3 = $(':radio[name=size]');
 	
-	var el4 = $('#result').on('click mouseover', function(e){
+	var el4 = $('#result').on('click', function(e){
 		var p = { "id":"L0409"
 				, "size": $(el3).filter(":checked").val()};
 		
@@ -45,7 +45,7 @@ $(function(){
 	var elementScan = new ElementScan(elements);
 	
 	var trigger = [];
-	trigger.push(eventProperties.mouseover);
+	//trigger.push(eventProperties.mouseover);
 	trigger.push(eventProperties.click);
 	trigger.push(eventProperties.keyup);
 	
