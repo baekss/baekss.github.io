@@ -20,9 +20,3 @@ This study provides an approach to apply AOP to event handler function of elemen
 
 ### Wiki 에서는 다양한 상황에 대비한 접근법을 제공합니다.
 https://github.com/baekss/baekss.github.io/wiki
-***
-*If you want a related project for this project. You can visit the https://github.com/baekss/baekss-api.github.io
-
-*このprojectと組み合わせたいprojectが必要でしたら、ここのページにアクセスお願いします。 https://github.com/baekss/baekss-api.github.io
-
-*이 프로젝트와 함께 진행되는 프로젝트를 다음의 페이지에서 확인하실 수 있습니다. https://github.com/baekss/baekss-api.github.io
