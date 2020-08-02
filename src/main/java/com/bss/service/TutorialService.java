@@ -1,6 +1,5 @@
 package com.bss.service;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import javax.annotation.PostConstruct;
@@ -11,6 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
 
+import com.bss.repository.TutorialRepository;
 import com.netflix.hystrix.contrib.javanica.annotation.HystrixCommand;
 
 import model.tutorial.Product;
@@ -19,6 +19,9 @@ import reactor.core.publisher.Mono;
 @Service
 public class TutorialService {
 	private static Logger logger = LoggerFactory.getLogger(TutorialService.class);
+	
+	@Autowired
+	TutorialRepository repository;
 	
 	@Autowired 
 	WebClient.Builder builder;
@@ -39,12 +42,7 @@ public class TutorialService {
 	}
 	
 	public List<Product> getTempProduct(long categoryId) throws Exception{
-		List<Product> products = new ArrayList<Product>();
-		products.add(new Product("Temp-A상품","L",12000));
-		products.add(new Product("Temp-B상품","M",15000));
-		products.add(new Product("Temp-C상품","S",22000));
-		//fallbackMethod 에서도 예외를 발생시킴
-		products.get(3);
-		return products; 
+		List<Product> products = repository.getProducts(); 
+		return products;
 	}
 }
