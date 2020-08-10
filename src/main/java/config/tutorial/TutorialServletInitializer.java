@@ -7,8 +7,7 @@ public class TutorialServletInitializer extends SpringBootServletInitializer {
 	
 	@Override
 	protected SpringApplicationBuilder configure(SpringApplicationBuilder application) {
-		Class[] configClass = new Class[]{TutorialAppConfig.class, MockExtractorConfiguration.class};
-		application.sources(configClass);
+		application.sources(TutorialAppConfig.class, MockExtractorConfiguration.class);
 		return application;
 	}
 
