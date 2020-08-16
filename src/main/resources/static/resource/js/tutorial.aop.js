@@ -41,8 +41,6 @@ function AopScan(elementScan, eventPropertyNames, eventAdviceFunctions){
 		eventPropertyNames.forEach(function(propertyName, i){
 			
 			if(typeof events[propertyName] !== "undefined"){
-				//This logic use a loop syntax because a element may has many event handler in same property name
-				//But it assume that a element has one event handler in same property name in this study
 				(events[propertyName]).forEach(function(v,i){
 					var proceed = v.handler;
 					targetElement.off(propertyName);

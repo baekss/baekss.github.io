@@ -22,7 +22,21 @@ public class TutorialController {
 	@RequestMapping(path="/products/{categoryId}", method=RequestMethod.GET)
 	@ResponseBody
 	public List<Product> getCategoryProducts(@PathVariable("categoryId") long categoryId) throws Exception{
-		List<Product> products = tutorialService.getProduct(categoryId);
+		List<Product> products = tutorialService.getProducts(categoryId);
 		return products;
+	}
+	
+	@RequestMapping(path="/products/{productId}/{price}", method=RequestMethod.GET)
+	@ResponseBody
+	public Product getProduct(@PathVariable("productId") String productId, @PathVariable("price") int price) throws Exception{
+		return tutorialService.getProduct(productId, price);
+	}
+	
+	public void a(Integer i) {
+		
+	}
+	
+	public void a(int i) {
+		
 	}
 }

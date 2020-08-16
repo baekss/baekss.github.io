@@ -18,5 +18,9 @@ public class TutorialRepository {
 		return products;
 	}
 	
+	public Product getProduct(String id, int price) {
+		return new Product("Temp-B상품","M",15000);
+	}
+	
 	
 }

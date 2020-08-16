@@ -15,8 +15,12 @@ public class TutorialService {
 	@Autowired
 	TutorialRepository repository;
 	
-	public List<Product> getProduct(long categoryId) throws Exception{
+	public List<Product> getProducts(long categoryId) throws Exception{
 		List<Product> products = repository.getProducts(); 
 		return products;
+	}
+	
+	public Product getProduct(String id, int price) throws Exception{
+		return repository.getProduct(id, price);
 	}
 }

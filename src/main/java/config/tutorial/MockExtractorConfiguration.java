@@ -16,8 +16,6 @@ import org.springframework.http.client.reactive.ReactorClientHttpConnector;
 import org.springframework.http.codec.json.Jackson2JsonDecoder;
 import org.springframework.http.codec.json.Jackson2JsonEncoder;
 import org.springframework.http.converter.json.Jackson2ObjectMapperBuilder;
-import org.springframework.util.LinkedMultiValueMap;
-import org.springframework.util.MultiValueMap;
 import org.springframework.web.reactive.function.client.ExchangeStrategies;
 import org.springframework.web.reactive.function.client.WebClient;
 
@@ -28,6 +26,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import io.netty.channel.ChannelOption;
 import io.netty.handler.timeout.ReadTimeoutHandler;
 import io.netty.handler.timeout.WriteTimeoutHandler;
+import reactor.core.publisher.Mono;
 import reactor.netty.http.client.HttpClient;
 
 @Configuration
@@ -41,11 +40,15 @@ public class MockExtractorConfiguration{
 	
 	@Aspect
 	class MockExtractor {
-		private WebClient.Builder builder;
+		{
+			this.objectMapper = newObjectMapper();
+		}
+		private WebClient webClient;
+		private ObjectMapper objectMapper;
 		
 		public MockExtractor() {
 			super();
-			this.injectWebClientBuilder();
+			this.injectWebClient();
 		}
 
 		public ObjectMapper newObjectMapper() {
@@ -57,7 +60,7 @@ public class MockExtractorConfiguration{
 					.build();
 		} 
 		
-		public void injectWebClientBuilder() {
+		private void injectWebClient() {
 			//http 통신시 타임아웃 설정
 			HttpClient httpClient = HttpClient.create()
 		            .tcpConfiguration(client ->
@@ -72,17 +75,18 @@ public class MockExtractorConfiguration{
 			ExchangeStrategies strategies = ExchangeStrategies.builder()
 											.codecs(clientDefaultCodecs -> {
 												clientDefaultCodecs.defaultCodecs()
-												.jackson2JsonEncoder(new Jackson2JsonEncoder(newObjectMapper(), MediaType.APPLICATION_JSON));
+												.jackson2JsonEncoder(new Jackson2JsonEncoder(objectMapper, MediaType.APPLICATION_JSON));
 												
 												clientDefaultCodecs.defaultCodecs()
-												.jackson2JsonDecoder(new Jackson2JsonDecoder(newObjectMapper(), MediaType.APPLICATION_JSON));
+												.jackson2JsonDecoder(new Jackson2JsonDecoder(objectMapper, MediaType.APPLICATION_JSON));
 												}).build();
-			//WebClient는 thread safe하지 않으므로 builder를 통해 메소드 내에서 객체를 새로 생성하여 사용
-			this.builder = WebClient.builder()
+			//WebClient는 불변객체 이므로 타 host와의 연동이 필요할 땐 mutate()를 호출하여 커스터마이징 한다.
+			this.webClient = WebClient.builder()
 					.defaultHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
 					.clientConnector(connector)
 					.exchangeStrategies(strategies)
-					.baseUrl("http://m.bss.com:9800");
+					.baseUrl("http://m.bss.com:9800")
+					.build();
 		}
 		
 		//custom annotation을 만들어서 pointcut을 확대
@@ -91,15 +95,18 @@ public class MockExtractorConfiguration{
 			String packageName = joinPoint.getTarget().getClass().getPackageName();
 			String className = joinPoint.getTarget().getClass().getSimpleName();
 			String methodName = joinPoint.getSignature().getName();
+			
+			//primitive type 도 wrapper class 명으로 저장된다.
 			String parameterTypes = Arrays.stream(joinPoint.getArgs())
-					.map(arg->arg.getClass().getName())
+					.map(arg->arg.getClass().getTypeName())
 					.collect(Collectors.joining(","));
+			
 			Object returnObject = retVal;
 			
-			MockMethod body = new MockMethod(methodName, parameterTypes, newObjectMapper().writeValueAsString(returnObject), new Mock(packageName, className));
+			MockMethod body = new MockMethod(methodName, parameterTypes, objectMapper.writeValueAsString(returnObject), new Mock(packageName, className));
 			
-			WebClient webClient = builder.build();
-			webClient.post().uri("/api/mock").bodyValue(body).retrieve().bodyToMono(Void.class).block();
+			Mono<Void> mono = this.webClient.post().uri("/api/mock").bodyValue(body).retrieve().bodyToMono(Void.class);
+			mono.subscribe(s->s.TYPE.toString());
 		}
 	}
 	
