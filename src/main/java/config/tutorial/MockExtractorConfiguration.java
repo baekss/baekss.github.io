@@ -1,8 +1,5 @@
 package config.tutorial;
 
-import java.util.Arrays;
-import java.util.stream.Collectors;
-
 import org.aspectj.lang.JoinPoint;
 import org.aspectj.lang.annotation.AfterReturning;
 import org.aspectj.lang.annotation.Aspect;
@@ -21,7 +18,9 @@ import org.springframework.web.reactive.function.client.WebClient;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility;
 import com.fasterxml.jackson.annotation.PropertyAccessor;
+import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
 
 import io.netty.channel.ChannelOption;
 import io.netty.handler.timeout.ReadTimeoutHandler;
@@ -35,32 +34,38 @@ public class MockExtractorConfiguration{
 	
 	@Bean(name="mockExtractor")
 	public MockExtractor mockExtractor() {
-		return new MockExtractor();
+		ObjectMapper objectMapper = Jackson2ObjectMapperBuilder
+									.json()
+									//직렬화 또는 역직렬화시 FIELD로만 핸들링 하게 한다.
+									.visibility(PropertyAccessor.ALL, Visibility.NONE)
+									.visibility(PropertyAccessor.FIELD, Visibility.ANY)
+									//enum 타입은 name을 이용해 핸들링 한다.
+									.featuresToEnable(SerializationFeature.WRITE_ENUMS_USING_TO_STRING)
+									.featuresToEnable(DeserializationFeature.READ_ENUMS_USING_TO_STRING)
+									.build();
+		
+		WebClient.Builder builder = WebClient.builder()
+									.defaultHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+									.baseUrl("http://m.bss.com:9800");
+		return MockExtractor.create(objectMapper, builder);
 	}
 	
 	@Aspect
-	class MockExtractor {
-		{
-			this.objectMapper = newObjectMapper();
-		}
+	static class MockExtractor {
+		
 		private WebClient webClient;
 		private ObjectMapper objectMapper;
 		
-		public MockExtractor() {
-			super();
-			this.injectWebClient();
+		public MockExtractor(ObjectMapper objectMapper, WebClient.Builder builder) {
+			this.objectMapper = objectMapper;
+			this.injectWebClient(builder);
 		}
-
-		public ObjectMapper newObjectMapper() {
-			return Jackson2ObjectMapperBuilder
-					.json()
-					//직렬화 또는 역직렬화시 FIELD로만 핸들링 하게 한다.
-					.visibility(PropertyAccessor.ALL, Visibility.NONE)
-					.visibility(PropertyAccessor.FIELD, Visibility.ANY)
-					.build();
-		} 
 		
-		private void injectWebClient() {
+		public static MockExtractor create(ObjectMapper objectMapper, WebClient.Builder builder){
+			return new MockExtractor(objectMapper, builder);
+		}
+		
+		private void injectWebClient(WebClient.Builder builder) {
 			//http 통신시 타임아웃 설정
 			HttpClient httpClient = HttpClient.create()
 		            .tcpConfiguration(client ->
@@ -81,11 +86,9 @@ public class MockExtractorConfiguration{
 												.jackson2JsonDecoder(new Jackson2JsonDecoder(objectMapper, MediaType.APPLICATION_JSON));
 												}).build();
 			//WebClient는 불변객체 이므로 타 host와의 연동이 필요할 땐 mutate()를 호출하여 커스터마이징 한다.
-			this.webClient = WebClient.builder()
-					.defaultHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+			this.webClient = builder
 					.clientConnector(connector)
 					.exchangeStrategies(strategies)
-					.baseUrl("http://m.bss.com:9800")
 					.build();
 		}
 		
@@ -96,10 +99,18 @@ public class MockExtractorConfiguration{
 			String className = joinPoint.getTarget().getClass().getSimpleName();
 			String methodName = joinPoint.getSignature().getName();
 			
-			//primitive type 도 wrapper class 명으로 저장된다.
+			
+			//primitive type 도 wrapper class 명으로 저장된다. 오버로딩 메소드 구분에 어려움 발생.
+			/*
 			String parameterTypes = Arrays.stream(joinPoint.getArgs())
 					.map(arg->arg.getClass().getTypeName())
 					.collect(Collectors.joining(","));
+			*/
+			
+			String parameterTypes = joinPoint.getSignature().toLongString();
+			int begin = parameterTypes.lastIndexOf("(");
+			int end = parameterTypes.lastIndexOf(")");
+			parameterTypes = parameterTypes.substring(begin+1, end);
 			
 			Object returnObject = retVal;
 			
@@ -110,32 +121,4 @@ public class MockExtractorConfiguration{
 		}
 	}
 	
-	class Mock{
-		private String packageName;
-		private String className;
-		
-		Mock(String packageName, String className) {
-			super();
-			this.packageName = packageName;
-			this.className = className;
-		}
-	}
-	
-	class MockMethod {
-		private String methodName;
-		private String parameterTypes;
-		private String returnObject;
-		private Mock mock;
-		
-		MockMethod(String methodName, String parameterTypes, String returnObject, Mock mock) {
-			super();
-			this.methodName = methodName;
-			this.parameterTypes = parameterTypes;
-			this.returnObject = returnObject;
-			this.mock = mock;
-		}
-	}
 }
-
-
-
