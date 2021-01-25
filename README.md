@@ -18,8 +18,9 @@ This study provides an approach to apply AOP to event handler function of elemen
 - ElementScan의 생성자에는 AOP를 적용할 요소의 배열을 넘겨줍니다.
 - AopScan의 생성자에는 ElementScan객체와 트리거 이벤트 그리고 부가적 관점 로직을 수행할 함수들을 넘겨줍니다.
 
-*If you want a related project for this project. You can visit the https://github.com/baekss/baekss-api.github.io
-
-*このprojectと組み合わせたいprojectが必要でしたら、ここのページにアクセスお願いします。 https://github.com/baekss/baekss-api.github.io
-
-*이 프로젝트와 함께 진행되는 프로젝트를 다음의 페이지에서 확인하실 수 있습니다. https://github.com/baekss/baekss-api.github.io
+```mermaid
+graph LR
+Table --> Order
+Order --> Menu
+Menu --> Product
+```
